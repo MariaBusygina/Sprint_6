@@ -1,33 +1,17 @@
 import allure
 from selenium.webdriver.common.by import By
+
 from pages.base_page import BasePage
+from locators import main_page_locators as L
 
 
 class MainPage(BasePage):
-    """
-    Page Object главной страницы.
+    """Page Object главной страницы."""
 
-    Реальные локаторы получены из DevTools сайта qa-scooter.education-services.ru
-    """
-
-    # --- Логотипы ---
-    # <a class="Header_LogoYandex__3TSOI" href="//ya.ru"><img alt="Yandex"></a>
-    # <a class="Header_LogoScooter__3lsAR" href="/"><img alt="Scooter"></a>
-    LOGO_YANDEX  = (By.CLASS_NAME, "Header_LogoYandex__3TSOI")
-    LOGO_SCOOTER = (By.CLASS_NAME, "Header_LogoScooter__3lsAR")
-
-    # --- Кнопки «Заказать» ---
-    # Верхняя: единственная кнопка с классом Button_Button__ra12g (без Button_Middle)
-    # <button class="Button_Button__ra12g">Заказать</button>  — в Header_Nav
-    ORDER_BUTTON_TOP = (By.XPATH, '//button[@class="Button_Button__ra12g"]')
-
-    # Нижняя: обёрнута в div class="Home_FinishButton__1cWm"
-    # <div class="Home_FinishButton__1cWm"><button class="Button_Button__ra12g Button_Middle__1CSJM">Заказать</button>
-    ORDER_BUTTON_BOTTOM = (By.XPATH, '//div[contains(@class,"Home_FinishButton")]//button')
-
-    # --- FAQ ---
-    # Заголовок: <div id="accordion__heading-N" role="button" class="accordion__button">
-    # Панель:    <div id="accordion__panel-N"   class="accordion__panel">
+    LOGO_YANDEX         = L.LOGO_YANDEX
+    LOGO_SCOOTER        = L.LOGO_SCOOTER
+    ORDER_BUTTON_TOP    = L.ORDER_BUTTON_TOP
+    ORDER_BUTTON_BOTTOM = L.ORDER_BUTTON_BOTTOM
 
     @allure.step("Открыть главную страницу")
     def open_main_page(self):
@@ -55,6 +39,14 @@ class MainPage(BasePage):
         self.scroll_to(element)
         self.js_click(element)
 
+    @allure.step("Перейти к форме заказа через кнопку «{entry_point}»")
+    def go_to_order(self, entry_point: str):
+        """Нажимает нужную кнопку «Заказать» в зависимости от точки входа."""
+        if entry_point == "top":
+            self.click_order_top()
+        else:
+            self.click_order_bottom()
+
     @allure.step("Нажать логотип Самоката")
     def click_scooter_logo(self):
         self.find_clickable(self.LOGO_SCOOTER).click()
@@ -62,6 +54,3 @@ class MainPage(BasePage):
     @allure.step("Нажать логотип Яндекса")
     def click_yandex_logo(self):
         self.find_clickable(self.LOGO_YANDEX).click()
-
-    def get_current_url(self):
-        return self.driver.current_url

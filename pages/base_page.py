@@ -4,19 +4,17 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
+from config import BASE_URL
+
 
 class BasePage:
-    BASE_URL = "https://qa-scooter.education-services.ru"
-
-    # Кнопка «да все привыкли» в баннере куки
-    # <button id="rcc-confirm-button" class="App_CookieButton__3cvqF ...">да все привыкли</button>
     COOKIE_BUTTON = (By.ID, "rcc-confirm-button")
 
     def __init__(self, driver):
         self.driver = driver
 
     def open(self, path=""):
-        self.driver.get(f"{self.BASE_URL}{path}")
+        self.driver.get(f"{BASE_URL}{path}")
 
     def find_element(self, locator, timeout=10):
         return WebDriverWait(self.driver, timeout).until(
@@ -58,6 +56,15 @@ class BasePage:
         except TimeoutException:
             return False
 
+    def get_current_url(self) -> str:
+        return self.driver.current_url
+
+    def get_window_handles(self) -> set:
+        return set(self.driver.window_handles)
+
+    def switch_to_window(self, handle: str):
+        self.driver.switch_to.window(handle)
+
     def wait_for_new_window(self, original_handles, timeout=10):
         WebDriverWait(self.driver, timeout).until(
             EC.number_of_windows_to_be(len(original_handles) + 1)
@@ -65,3 +72,8 @@ class BasePage:
         for handle in self.driver.window_handles:
             if handle not in original_handles:
                 return handle
+
+    def wait_for_url_contains(self, domains: list, timeout=15):
+        WebDriverWait(self.driver, timeout).until(
+            lambda d: any(domain in d.current_url for domain in domains)
+        )
